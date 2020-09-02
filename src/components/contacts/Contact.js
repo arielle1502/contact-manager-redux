@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Consumer } from '../../context';
-import axios from 'axios';
-
+import { connect } from 'react-redux'
 
 class Contact extends Component {
   state = {
@@ -16,14 +14,9 @@ class Contact extends Component {
     this.setState({ showContactInfo: !this.state.showContactInfo });
   }
   
-  delClick = async (id, dispatch) => {
+  delClick = id => {
     console.log("delete: " + id);
-    // this if for the old way when we passed the the function through.
-    // This calls the function in contacts.js (parent component) and will pass the id through.
-    // this.props.delContact(id);
-    // we now dispatch our action to the reducer so it can update the state.
-    await axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`)
-    dispatch({ type: 'DELETE_CONTACT', payload: id });
+  //  this.props.deleteContact(id);
   }
   
   // This will render our contact object passed from contacts.
@@ -33,10 +26,7 @@ class Contact extends Component {
     // Pull value out of the state.
     const { showContactInfo } = this.state;
     return (
-      <Consumer>
-        { value => {
-          const { dispatch } = value; // this is pulling our dispatch function in our Consumer
-          return (
+      
             <div className='card card-body mb-3'>
               <h2>
                 { name }{' '}
@@ -44,7 +34,7 @@ class Contact extends Component {
                 </FontAwesomeIcon>
                 {/* This onclick call the local delClick function */}
                 <FontAwesomeIcon icon='times' style={{ cursor: "pointer", float: "right", color: "red", marginLeft: '10px'  }}
-                  onClick={this.delClick.bind(this, id, dispatch)}
+                  onClick={this.delClick.bind(this, id)}
                 > 
                 </FontAwesomeIcon>
                 
@@ -62,21 +52,14 @@ class Contact extends Component {
               ) : null 
               }
             </div>
-          )}} 
+          )
+            }}
           {/* this is end the inner return and value sections */}
-      </Consumer>
-    ) // this closes the outer return
-  }
-}
 
-Contact.defaultProps = {
-  name: 'Jade Doe',
-  email: 'jadedoe@gmail.com',
-  phone: '(555)-444-5555'
-}
+
 
 Contact.propTypes = {
-  contact: PropTypes.object,
+  contact: PropTypes.object.isRequired,
 }
 
-export default Contact
+export default connect(null, { })(Contact)

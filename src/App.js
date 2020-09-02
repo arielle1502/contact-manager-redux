@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch }  from 'react-router-dom';
-import './App.css';
+
+// reducx imports
+import { Provider } from 'react-redux';
+import store from './store';
+
 
 // Font awestuff 
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPencilAlt, faTimes, faHome, faPlus, faQuestion, faSortDown, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 // Import custom components
-import { Provider } from './context';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Contacts from './components/contacts/Contacts';
@@ -23,7 +26,7 @@ class App extends Component {
      // Create a Font awesome library
     library.add(faPencilAlt, faTimes, faHome, faPlus, faQuestion, faSortDown, faExclamationTriangle)
     return (
-      <Provider>
+      <Provider store={store}>
         <Router>
           <Header branding='Contact Manager'/>
           <div className="container">
