@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
+import {deleteContact} from '../../actions/contactActions'
 
 class Contact extends Component {
   state = {
@@ -16,7 +17,7 @@ class Contact extends Component {
   
   delClick = id => {
     console.log("delete: " + id);
-  //  this.props.deleteContact(id);
+    this.props.deleteContact(id);
   }
   
   // This will render our contact object passed from contacts.
@@ -53,13 +54,12 @@ class Contact extends Component {
               }
             </div>
           )
-            }}
-          {/* this is end the inner return and value sections */}
-
-
+        }}
+         
 
 Contact.propTypes = {
   contact: PropTypes.object.isRequired,
+  deleteContact: PropTypes.func.isRequired,
 }
 
-export default connect(null, { })(Contact)
+export default connect(null, { deleteContact})(Contact)

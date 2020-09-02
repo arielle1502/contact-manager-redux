@@ -1,33 +1,34 @@
 import React, { Component, Fragment } from 'react';
 import classnames from 'classnames';
-import { Consumer } from '../../context';
-import axios from 'axios';
+import { connect } from 'react-redux'
+import PropTypes from 'prop-types'
+import { getContact, updateContact } from '../../actions/contactActions'
 
 class EditContact extends Component {
-  // The state only holds the errors as we are using refs to hold the values from the form(added name, email phone back in onyl for api functionality)
+  
   state = {
     name:'',
     email:'',
     phone:'',
     errors: {},
   };
-  
-  // create the refs to hold the values from the form.Dont need them for the api
-  // nameInput = React.createRef();
-  // emailInput = React.createRef();
-  // phoneInput = React.createRef();
+ 
+  componentWillReceiveProps(nextProps, nextState){
+    const { name, email, phone } = nextProps.contact;
+    this.setState({
+      name: name,
+      email: email,
+      phone: phone
+    });
+  }
 
   // using a componentdidmount onyl for use with api
-  async componentDidMount(){
+  componentDidMount(){
     // get our id from URL
     const { id } = this.props.match.params;
-    const res = await axios.get(`https://jsonplaceholder.typicode.com/users/${id}`);
-    const contact = res.data;
-    this.setState({
-      name: contact.name,
-      email: contact.email,
-      phone: contact.phone
-    })
+    this.props.getContact(id);
+    
+    
   }
 // this on change function was added only for api/can be deleted for use without api
   onChange = e => {
@@ -37,25 +38,13 @@ class EditContact extends Component {
   }
 
   // this function will be called when the form is submitted.
-  handleSubmit = async (dispatch, e) => {
+  handleSubmit = (e) => {
     e.preventDefault();
     console.log("Submit: update")
 
-    // creating variables to store our values.
-    // Pull the id out of the url
-    const { id } = this.props.match.params;
-    // the below was commented out for the API functionality!from here
-    // // get the current value from the form using the refs we set up.
-    // const name = this.nameInput.current.value;
-    // const email = this.emailInput.current.value;
-    // const phone = this.phoneInput.current.value;
-    // console.log(name + ' ' + email + ' ' + phone)//to here
-
-    // this is shortcut so we dont have type this.sate.name, etc
     const { name, email, phone} = this.state;
 
     // Check for Errors
-    
     if (name === ''){
       // this sets errors.name state value
       this.setState({ errors: {name: 'Name is required '}});
@@ -70,13 +59,11 @@ class EditContact extends Component {
       // this sets errors.name state value
       this.setState({ errors: {phone: 'Phone is required '}});
       return; // this will stop the onSubmit from running
-    }
-    // we call also use Bootstrap -isValid -isInvalid 
-    // we can change the classes dynamically. 
-    
+    }  
+    const { id } = this.props.match.params;
     // create a updated Contact object 
     const updContact = {
-      // id: id, dont need for api
+      id,
       name: name,
       email: email,
       phone: phone
@@ -85,12 +72,8 @@ class EditContact extends Component {
      // send the updated contact to an api or state managment.
     console.log(updContact);
 
-    const res = await axios.put(`https://jsonplaceholder.typicode.com/users/${id}`, updContact);
-
-    // this is where we would call our dispatch function
-    // dispatch our updated contact to the global state
-    dispatch({ type: 'UPDATE_CONTACT', payload: res.data});//replaced updContact with res.data
-
+    // call the updateContact function
+    this.props.updateContact(updContact);
     // redirect the browser back to the contacts page ('/')
     this.props.history.push("/");
   }
@@ -101,19 +84,12 @@ class EditContact extends Component {
     // pull the errors out of state.
     const { name, email, phone, errors } = this.state;//is only errors if not using api
     return (
-      <Consumer>
-        { value => {
-          const { dispatch } = value; //removed contacts for api
-          // get the contact from the state by finding the contact in the 
-          // contacts array by matching the cont.id to the cid from the url
-          // const contact = contacts.find(cont => cont.id === cid.id);//commented out for api
-          return (
-            <Fragment>
+        <Fragment>
               <h1 className="display-4 text-primary">Edit Contact</h1>
               <div className="card mb-3">
                 <div className="card-header">Update Contact</div>
                 <div className="card-body">
-                  <form onSubmit={this.handleSubmit.bind(this, dispatch)}>
+                  <form onSubmit={this.handleSubmit}>
                     <div className="form-group">
                       <label>Name</label>
                       <input 
@@ -166,10 +142,19 @@ class EditContact extends Component {
                 
               </div>   {/* end of the card */}
             </Fragment>  
-           )}}
-      </Consumer>
-    )
-  }
+           )
+          }
+        }
+     
+
+EditContact.propTypes = {
+  contact: PropTypes.object.isRequired,
+  getContact: PropTypes.func.isRequired,
+  updateContact: PropTypes.func.isRequired,
 }
 
-export default EditContact;
+const mapStateToProps = state => ({
+  contact: state.contact.contact
+})
+
+export default connect(mapStateToProps, { getContact, updateContact })(EditContact);

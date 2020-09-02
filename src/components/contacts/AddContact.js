@@ -1,8 +1,11 @@
 import React, { Component, Fragment } from 'react';
 import classnames from 'classnames';
 // import { v4 as uuidv4 } from 'uuid'; // dont need this with an api, api assigns this for us
-import { Consumer } from '../../context';
-import axios from 'axios';//added only for api
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { addContact } from '../../actions/contactActions'
+
+
 
 class AddContact extends Component {
   // This is the state for the component, 
@@ -24,7 +27,7 @@ class AddContact extends Component {
   }
 
   // this function will be called when the form is submitted.async was added only for api
-  onSubmit =  async (dispatch, e) => {
+  onSubmit = (e) => {
     e.preventDefault();
     // creating variables to store our state values.
     const { name, email, phone } = this.state; // instead of typing this.state.name
@@ -50,33 +53,25 @@ class AddContact extends Component {
     
     // create a newContact object 
     const newContact = {
-      // id: uuidv4(), dont need this anymore, api assigns id's
       name,
       email,
       phone
     }
-     // send the newcontact to an api or state managment.
-    console.log(newContact);
-    const res = await axios.post('https://jsonplaceholder.typicode.com/users', newContact)
-    // this is where we would call our dispatch function
-    dispatch({ type: 'ADD_CONTACT', payload: res.data});//res.data replaced newContact
-    // redirect the browser back to the contacts page ('/')
+     // SUBMIT CONTACT
+    this.props.addContact(newContact);
+
     this.props.history.push("/");
   }
   
   render() {
     const { name, email, phone, errors } = this.state;
     return (
-      <Consumer>
-        { value => {
-          const { dispatch } = value;
-          return (
-            <Fragment>
+        <Fragment>
               <h1 className="display-4 text-primary">Add New Contact</h1>
               <div className="card mb-3">
                 <div className="card-header">Add Contact</div>
                 <div className="card-body">
-                  <form onSubmit={this.onSubmit.bind(this, dispatch)}>
+                  <form onSubmit={this.onSubmit}>
                     <div className="form-group">
                       <label>Name</label>
                       <input 
@@ -120,9 +115,9 @@ class AddContact extends Component {
               </div>   {/* end of the card */}
             </Fragment>  
            )}}
-      </Consumer>
-    )
-  }
+
+AddContact.propTypes = {
+  addContact: PropTypes.func.isRequired,
 }
 
-export default AddContact;
+export default connect(null, {addContact})(AddContact);
